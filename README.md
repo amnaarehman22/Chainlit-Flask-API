@@ -4,3 +4,14 @@ Chainlit-Flask-Api is a project that integrates the Falcon large language model 
 ## Features
 #### Frontend: User-friendly interface using Chainlit.
 #### Backend: REST API built with Flask to handle user queries and generate responses using the Falcon LLM.
+
+
+## Installation
+pip install chainlit
+pip install flask
+
+
+## Run
+ollama list
+ollama serve
+chainlit run app/app.py -w
