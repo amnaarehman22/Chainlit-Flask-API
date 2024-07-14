@@ -1,6 +1,5 @@
-from flask import Flask, request
+from flask import Flask, request, jsonify, send_from_directory
 from langchain_community.llms import Ollama
-import chainlit as cl
 
 app = Flask(__name__)
 
@@ -11,19 +10,32 @@ except Exception as e:
     print(f"Error loading LLaMA model: {str(e)}")
     cached_llm = None
 
-# Handle incoming messages using Chainlit
-@cl.on_message
-async def main(message: cl.Message):
+# Serve the frontend
+@app.route('/')
+def index():
+    return send_from_directory('.', 'index.html')
+
+# Endpoint for querying LLM
+@app.route('/query', methods=['POST'])
+def query():
     if cached_llm is None:
-        await cl.Message("Error: LLaMA model not loaded").send()
-        return
+        return jsonify({'response': 'Error: LLaMA model not loaded'}), 500
+
+    if request.is_json:
+        user_query = request.json.get('query')
+    else:
+        user_query = request.form.get('query')
+
+    if not user_query:
+        return jsonify({'response': 'Error: No query provided'}), 400
 
     try:
         # Generate response using LLaMA model
-        response = cached_llm.invoke(message.content)
+        response = cached_llm.invoke(user_query)
     except Exception as e:
-        await cl.Message(f"Error generating response: {str(e)}").send()
-        return
+        return jsonify({'response': f"Error generating response: {str(e)}"}), 500
 
-    # Send the response back
-    await cl.Message(response).send()
+    return jsonify({'response': response}), 200
+
+if __name__ == "__main__":
+    app.run(debug=True)
