@@ -14,4 +14,6 @@ pip install flask
 ## Run
 ollama list
 ollama serve
-chainlit run app/app.py -w
+
+chainlit run app/chainlit.py -w
+python app/app.py
